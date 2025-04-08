@@ -10,7 +10,6 @@ interface Props {
 const layout = ({ children }: Props) => {
     return (
         <SidebarProvider>
-            {/* <AppSidebar> */}
             <main className='w-full m-2'>
                 <div className='flex items-center gap-2 border-sidebar-border bg-sidebar border shadow rounded-md p-2 px-4'>
                     {/* <SearchBar /> */}
@@ -23,8 +22,8 @@ const layout = ({ children }: Props) => {
                 <div className='border-sidebar-border bg-sidebar border shadow rounded-md overflow-y-scroll h-[calc(100vh-6rem)] p-4'>
                     {children}
                 </div>
+                <AppSidebar/>
             </main>
-            <AppSidebar/>
         </SidebarProvider>
     )
 }
