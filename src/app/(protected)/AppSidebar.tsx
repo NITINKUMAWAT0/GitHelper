@@ -1,8 +1,9 @@
 'use client'
 
+import { Button } from "@/components/ui/button";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils";
-import { Bot, CreditCard, LayoutDashboardIcon, Presentation } from "lucide-react";
+import { Bot, CreditCard, LayoutDashboardIcon, Plus, Presentation } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -51,8 +52,8 @@ export function AppSidebar() {
             <SidebarHeader>
                 <h1>logo</h1>
             </SidebarHeader>
-
             <SidebarContent>
+
                 {/* upper sidebar group */}
                 <SidebarGroup>
                     <SidebarGroupLabel>
@@ -104,10 +105,20 @@ export function AppSidebar() {
                                         </SidebarMenuItem>
                                     )
                                 })}
+
+                                <div className="h-2">
+                                    <SidebarMenuItem>
+                                        <Link href="/create">
+                                        <Button size='sm' variant={"outline"} className="w-fit">
+                                            <Plus/>
+                                       Create Project 
+                                    </Button>
+                                        </Link>
+                                    </SidebarMenuItem>
+                                </div>
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
-
             </SidebarContent>
         </Sidebar>
     );
