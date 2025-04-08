@@ -1,6 +1,7 @@
 import { SidebarProvider } from '@/components/ui/sidebar'
 import { UserButton } from '@clerk/nextjs'
 import React from 'react'
+import { AppSidebar } from './AppSidebar'
 
 interface Props {
     children: React.ReactNode
@@ -23,7 +24,7 @@ const layout = ({ children }: Props) => {
                     {children}
                 </div>
             </main>
-            {/* </AppSidebar> */}
+            <AppSidebar/>
         </SidebarProvider>
     )
 }
