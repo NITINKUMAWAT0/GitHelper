@@ -26,6 +26,24 @@ const items = [
     }
 ]
 
+const projects = [
+    {
+        name:"Project 1"
+    },
+    {
+        name:"Project 2"
+    },
+    {
+        name:"Project 3"
+    },
+    {
+        name:"Project 4"
+    },
+    {
+        name:"Project 5"
+    },
+]
+
 export function AppSidebar() {
     const pathname = usePathname();
     return (
@@ -35,6 +53,7 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
+                {/* upper sidebar group */}
                 <SidebarGroup>
                     <SidebarGroupLabel>
                         Application
@@ -58,6 +77,37 @@ export function AppSidebar() {
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
+
+                {/* lower sidebar group */}
+                <SidebarGroup>
+                    <SidebarGroupLabel>
+                         Your Projects
+                    </SidebarGroupLabel>
+                    <SidebarGroupContent>
+                        <SidebarMenu>
+                                {projects.map(project=>{
+                                    return(
+                                        <SidebarMenuItem key={project.name}>
+                                            <SidebarMenuButton asChild>
+                                                <div>
+                                                    <div className={cn(
+                                                        `rounded-sm border size-6 flex items-center justify-center text-sm bg-white text-primary`,
+                                                        {
+                                                             'bg-primary text-white': true
+                                                        }
+                                                    )}>
+                                                        {project.name[0]}
+                                                    </div>
+                                                    <span>{project.name}</span>
+                                                </div>
+                                            </SidebarMenuButton>
+                                        </SidebarMenuItem>
+                                    )
+                                })}
+                        </SidebarMenu>
+                    </SidebarGroupContent>
+                </SidebarGroup>
+
             </SidebarContent>
         </Sidebar>
     );
