@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-misused-promises */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
@@ -9,6 +11,7 @@ import { useForm } from 'react-hook-form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { api } from '@/trpc/react'
+import { toast } from 'sonner'
 
 interface FormInput {
     repoUrl: string
@@ -22,6 +25,18 @@ const Create = () => {
 
     function onSubmit(data: FormInput) {
         window.alert(JSON.stringify(data, null, 2))
+        createProject.mutate({
+            githubUrl: data.repoUrl,
+            name:data.projectName,
+            githubToken:data.githubToken,
+        },{
+            onSuccess:()=>{
+                toast.success('Project created successfully');
+            },
+            onError:()=>{
+                toast.error('Failed to create project');
+            }
+        })
         return true
     }
     return (
