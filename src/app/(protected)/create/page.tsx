@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
 import React from 'react'
@@ -5,6 +7,7 @@ import Image from 'next/image' // ✅ Add this line
 import UndrawGithub from '../../images/Undraw_github.png'
 import { useForm } from 'react-hook-form'
 import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 
 interface FormInput {
     repoUrl: string
@@ -16,7 +19,7 @@ const Create = () => {
     const { register, handleSubmit, reset } = useForm<FormInput>()
 
     function onSubmit(data: FormInput) {
-        window.alert(data)
+        window.alert(JSON.stringify(data, null, 2))
         return true
     }
     return (
@@ -44,6 +47,7 @@ const Create = () => {
                                 {...register("repoUrl", { required: true })}
                                 placeholder='Repository URL'
                                 className='mt-4'
+                                type="url"
                             />
 
                             <Input required
@@ -51,6 +55,10 @@ const Create = () => {
                                 placeholder='Github Token(Optional)'
                                 className='mt-4'
                             />
+
+                            <Button className='mt-4' type="submit">
+                                Create Project
+                            </Button>
                         </form>
                     </div>
                 </div>

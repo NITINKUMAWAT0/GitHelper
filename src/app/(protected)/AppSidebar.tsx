@@ -56,7 +56,7 @@ export function AppSidebar() {
                 <div className="flex items-center gap-2">
                     <Image src={GitHubLogo} alt="logo" width={40} height={40} />
                     {open && (
-                        <h1 className="text-2xl font-bold text-primary">Helper</h1>
+                        <h1 className="text-2xl font-bold text-black">Helper</h1>
                     )}
                 </div>
             </SidebarHeader>
