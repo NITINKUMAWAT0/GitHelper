@@ -8,6 +8,7 @@ import UndrawGithub from '../../images/Undraw_github.png'
 import { useForm } from 'react-hook-form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { api } from '@/trpc/react'
 
 interface FormInput {
     repoUrl: string
@@ -17,6 +18,7 @@ interface FormInput {
 
 const Create = () => {
     const { register, handleSubmit, reset } = useForm<FormInput>()
+    const createProject = api.project.createProject.useMutation()
 
     function onSubmit(data: FormInput) {
         window.alert(JSON.stringify(data, null, 2))
