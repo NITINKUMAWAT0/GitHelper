@@ -24,7 +24,6 @@ const Create = () => {
     const createProject = api.project.createProject.useMutation()
 
     function onSubmit(data: FormInput) {
-        window.alert(JSON.stringify(data, null, 2))
         createProject.mutate({
             githubUrl: data.repoUrl,
             name:data.projectName,
@@ -73,7 +72,7 @@ const Create = () => {
                                 className='mt-4'
                             />
 
-                            <Button className='mt-4' type="submit">
+                            <Button className='mt-4' type="submit" disabled={createProject.isPending}>
                                 Create Project
                             </Button>
                         </form>
