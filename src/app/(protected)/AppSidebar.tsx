@@ -7,7 +7,7 @@ import { Bot, CreditCard, LayoutDashboardIcon, Plus, Presentation } from "lucide
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import GitHubLogo from "../../../public/GithubLogo.png"
+import GitHubLogo from "../images/GithubLogo.png"
 
 const items = [
     {
