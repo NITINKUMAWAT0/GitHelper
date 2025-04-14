@@ -1,13 +1,26 @@
 'use client'
 
 import { Button } from "@/components/ui/button";
-import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar"
+// Make sure the sidebar import is correct
+import { 
+  Sidebar, 
+  SidebarContent, 
+  SidebarGroup, 
+  SidebarGroupContent, 
+  SidebarGroupLabel, 
+  SidebarHeader, 
+  SidebarMenu, 
+  SidebarMenuButton, 
+  SidebarMenuItem, 
+  useSidebar 
+} from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { Bot, CreditCard, LayoutDashboardIcon, Plus, Presentation } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import GitHubLogo from "../images/GithubLogo.png"
+import GitHubLogo from "../images/GithubLogo.png";
+import useProject from "@/hooks/useProject";
 
 const items = [
     {
@@ -27,29 +40,13 @@ const items = [
         url: "/billing",
         icon: CreditCard
     }
-]
-
-const projects = [
-    {
-        name:"Project 1"
-    },
-    {
-        name:"Project 2"
-    },
-    {
-        name:"Project 3"
-    },
-    {
-        name:"Project 4"
-    },
-    {
-        name:"Project 5"
-    },
-]
+];
 
 export function AppSidebar() {
     const pathname = usePathname();
-    const {open} = useSidebar()
+    const { open } = useSidebar();
+    const { projects = [], projectId, setProjectId } = useProject() || {};
+    
     return (
         <Sidebar collapsible="icon" variant="floating">
             <SidebarHeader>
@@ -94,33 +91,42 @@ export function AppSidebar() {
                     </SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
-                                {projects.map(project=>{
-                                    return(
-                                        <SidebarMenuItem key={project.name}>
-                                            <SidebarMenuButton asChild>
-                                                <div>
-                                                    <div className={cn(
-                                                        `rounded-sm border size-6 flex items-center justify-center text-sm bg-white text-primary`,
-                                                        {
-                                                             'bg-primary text-white': true
-                                                        }
-                                                    )}>
-                                                        {project.name[0]}
+                                {projects && projects.length > 0 ? (
+                                    projects.map(project => {
+                                        return (
+                                            <SidebarMenuItem key={project.name}>
+                                                <SidebarMenuButton asChild>
+                                                    <div onClick={() => {
+                                                        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+                                                        setProjectId && setProjectId(project.id);
+                                                    }}>
+                                                        <div className={cn(
+                                                            `rounded-sm border size-6 flex items-center justify-center text-sm bg-white text-primary`,
+                                                            {
+                                                                'bg-primary text-white': project.id === projectId
+                                                            }
+                                                        )}>
+                                                            {project.name[0]}
+                                                        </div>
+                                                        <span>{project.name}</span>
                                                     </div>
-                                                    <span>{project.name}</span>
-                                                </div>
-                                            </SidebarMenuButton>
-                                        </SidebarMenuItem>
-                                    )
-                                })}
+                                                </SidebarMenuButton>
+                                            </SidebarMenuItem>
+                                        )
+                                    })
+                                ) : (
+                                    <SidebarMenuItem>
+                                        <div className="text-sm text-muted-foreground px-2">No projects yet</div>
+                                    </SidebarMenuItem>
+                                )}
 
                                 <div className="h-2">
                                     <SidebarMenuItem>
                                         <Link href="/create">
-                                        <Button size='sm' variant={"outline"} className="w-fit mt-4">
+                                        <Button size='sm' variant="outline" className="w-fit mt-4">
                                             <Plus/>
-                                       Create Project 
-                                    </Button>
+                                            Create Project 
+                                        </Button>
                                         </Link>
                                     </SidebarMenuItem>
                                 </div>
@@ -130,4 +136,4 @@ export function AppSidebar() {
             </SidebarContent>
         </Sidebar>
     );
-};
+}
