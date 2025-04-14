@@ -23,7 +23,7 @@ interface FormInput {
 const Create = () => {
     const { register, handleSubmit, reset } = useForm<FormInput>()
     const createProject = api.project.createProject.useMutation()
-    const refetch = useRefetch()
+    const refetch = useRefetch();
 
     function onSubmit(data: FormInput) {
         createProject.mutate({
@@ -31,9 +31,9 @@ const Create = () => {
             name:data.projectName,
             githubToken:data.githubToken,
         },{
-            onSuccess:()=>{
+            onSuccess:async ()=>{
                 toast.success('Project created successfully');
-                void refetch();
+                await refetch();
                 reset();
             },
             onError:()=>{

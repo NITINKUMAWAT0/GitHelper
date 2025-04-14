@@ -1,17 +1,31 @@
 'use client'
-
 import useProject from '@/hooks/useProject'
 import React from 'react'
+import { ExternalLink, Github } from 'lucide-react'
+import Link from 'next/link'
 
-const Dashboard: React.FC = () => {
-  const { projects = [], projectId } = useProject() || {};
-  
-  // Find the current project based on projectId
-  const currentProject = projects.find(project => project.id === projectId);
+const Dashboard = () => {
+  const { projects = [], projectId } = useProject() || {}
+  const currentProject = projects.find(project => project.id === projectId)
 
   return (
-    <div>
-      <h1>{currentProject?.name ?? 'No project selected'}</h1>
+    <div>      
+      {currentProject?.githubUrl && (
+        <div className='flex items-center justify-center flex-wrap gap-y-4'>
+          <div className='flex items-center w-fit rounded-md bg-primary px-4 py-3'>
+            <Github className='size-5 text-white'/>
+            <div className='ml-2'>
+              <p className='text-sm font-medium text-white'>
+                This project is linked to{' '}
+                <Link href={currentProject.githubUrl} target="_blank" rel="noopener noreferrer" className='inline-flex items-center text-white/80 hover:underline'>
+                  {currentProject.githubUrl}
+                  <ExternalLink className='ml-1 size-4'/>
+                </Link>
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
