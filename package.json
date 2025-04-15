@@ -18,10 +18,13 @@
     "lint:fix": "next lint --fix",
     "preview": "next build && next start",
     "start": "next start",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "github": "tsx src/lib/github.ts",
+    "gemini": "tsx src/lib/gemini.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.13.0",
+    "@google/generative-ai": "^0.24.0",
     "@hookform/resolvers": "^5.0.1",
     "@octokit/rest": "^21.1.1",
     "@prisma/client": "^6.5.0",
@@ -45,8 +48,10 @@
     "@trpc/client": "^11.0.2",
     "@trpc/react-query": "^11.0.2",
     "@trpc/server": "^11.0.2",
+    "axios": "^1.8.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "dotenv": "^16.5.0",
     "lucide-react": "^0.487.0",
     "next": "^15.2.3",
     "octokit": "^4.1.3",

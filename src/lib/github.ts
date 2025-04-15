@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
@@ -6,13 +7,14 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import { db } from "@/server/db";
+import { headers } from "next/headers";
 import { Octokit } from "octokit";
+import axios from "axios";
+import { aiSummariseCommit } from "./gemini";
 
 export const octokit = new Octokit({
   auth: process.env.GITHUB_TOKEN,
 });
-
-const githubUrl = "https://github.com/NITINKUMAWAT0/DM-Automation-SAAS";
 
 type Response = {
   commitHash: string;
@@ -25,9 +27,13 @@ type Response = {
 export const getCommitHashes = async (
   _githubUrl: string,
 ): Promise<Response[]> => {
+  const [owner, repo] = _githubUrl.split("/").slice(-2);
+  if (!owner || !repo) {
+    throw new Error("Invalid github url");
+  }
   const { data } = await octokit.rest.repos.listCommits({
-    owner: "NITINKUMAWAT0",
-    repo: "DM-Automation-SAAS",
+    owner,
+    repo,
   });
 
   const sortedCommits = data.sort(
@@ -52,9 +58,47 @@ export const pollCommits = async (projectId: string) => {
     projectId,
     commitHashes,
   );
-  console.log(unprocessedCommits);
-  return unprocessedCommits;
+  const summaryResponses = await Promise.allSettled(
+    unprocessedCommits.map((commit) => {
+      return summariseCommit(githubUrl, commit.commitHash);
+    }),
+  );
+
+  const summaries = summaryResponses.map((response) => {
+    if (response.status === "fulfilled") {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      return response.value as string;
+    }
+    return "";
+  });
+
+  const commits = await db.commit.createMany({
+    data: summaries.map((summary, index) => {
+        console.log(`processing commit ${index}`);
+        
+      return {
+        projectId: projectId,
+        commitHash: unprocessedCommits[index]!.commitHash,
+        commitMessage: unprocessedCommits[index]!.commitMessage,
+        commitAuthorName: unprocessedCommits[index]!.commitAuthorName,
+        commitAuthorAvatar: unprocessedCommits[index]!.commitAuthorAvatar,
+        commitDate: unprocessedCommits[index]!.commitDate,
+        summary,
+      };
+    }),
+  });
+
+  return commits;
 };
+
+async function summariseCommit(githubUrl: string, commitHash: string) {
+  const [data] = await axios.get(`${githubUrl}/commit/${commitHash}.diff`, {
+    headers: {
+      accept: "application/vnd.github.v3.diff",
+    },
+  });
+  return aiSummariseCommit(data) || "";
+}
 
 async function fetchProjectGithubUrl(projectId: string) {
   const project = await db.project.findUnique({
@@ -87,6 +131,5 @@ async function filterUnprocessedCommits(
 
   return unprocessedCommits;
 }
- 
-await pollCommits('e70e93ed-7cb2-4193-8877-7a740f3283b2')
 
+await pollCommits("cd10ffc7e4b9cd2c630da2ca88c57055bd5dc265");
