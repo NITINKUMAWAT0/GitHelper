@@ -4,7 +4,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { getCommitHashes, pollCommits } from "@/lib/github";
+import { pollCommits } from "@/lib/github";
+import { indexGithubRepo } from "@/lib/github-loader";
 
 export const projectRouter = createTRPCRouter({
   createProject: protectedProcedure
@@ -25,11 +26,12 @@ export const projectRouter = createTRPCRouter({
           githubUrl,
           userToProject: {
             create: {
-              userId: ctx.user.userId, // assuming userId is always defined after middleware
+              userId: ctx.user.userId!, // assuming userId is always defined after middleware
             },
           },
         },
       });
+      await indexGithubRepo(project.id, input.githubUrl, input.githubToken)
       await pollCommits(project.id)
       return project;
     }),
