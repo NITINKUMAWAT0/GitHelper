@@ -20,7 +20,8 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "github": "tsx src/lib/github.ts",
-    "gemini": "tsx src/lib/gemini.ts"
+    "gemini": "tsx src/lib/gemini.ts",
+    "githubloader":"tsx src/lib/github-loader.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.13.0",
