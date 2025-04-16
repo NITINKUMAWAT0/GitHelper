@@ -17,6 +17,7 @@ export const projectRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { name, githubUrl, githubToken } = input;
 
       const project = await ctx.db.project.create({
@@ -25,42 +26,31 @@ export const projectRouter = createTRPCRouter({
           githubUrl,
           userToProject: {
             create: {
-              userId: ctx.user.userId!,
+              userId: ctx.user.userId!, // assuming userId is always defined after middleware
             },
           },
         },
       });
-
-      try {
-        await indexGithubRepo(project.id, githubUrl, githubToken);
-      } catch (e) {
-        console.error("Indexing failed, but project was created:", e);
-      }
-
-      await pollCommits(project.id).catch(console.error);
-
+      await indexGithubRepo(project.id, input.githubUrl, input.githubToken)
+      await pollCommits(project.id)
       return project;
     }),
-
-  getProjects: protectedProcedure.query(async ({ ctx }) => {
-    return ctx.db.project.findMany({
-      where: {
-        userToProject: {
-          some: {
-            userId: ctx.user.userId!,
+    getProjects:protectedProcedure.query(async({ctx})=>{
+      return ctx.db.project.findMany({
+        where:{
+          userToProject:{
+            some:{
+              userId:ctx.user.userId!
+            }
           },
-        },
-        deletedAt: null,
-      },
-    });
-  }),
-
-  getCommits: protectedProcedure
-    .input(z.object({ projectId: z.string() }))
-    .query(async ({ ctx, input }) => {
-      pollCommits(input.projectId).catch(console.error);
-      return ctx.db.commit.findMany({
-        where: { projectId: input.projectId },
-      });
+          deletedAt:null
+        }
+      })
     }),
+    getCommits:protectedProcedure.input(z.object({
+      projectId: z.string()
+    })).query(async ({ctx, input}) => {
+      pollCommits(input.projectId).then().catch(console.error)
+      return await ctx.db.commit.findMany({ where: {projectId: input.projectId}})
+    })
 });

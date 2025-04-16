@@ -37,7 +37,7 @@ model Project {
     userToProject UserToProject[]
 
     Commit               Commit[]
-    SourceCodeEmbeddings SourceCodeEmbeddings[]
+    SourceCodeEmbedding SourceCodeEmbedding[]
 }
 
 model UserToProject {
@@ -54,7 +54,7 @@ model UserToProject {
     @@unique([userId, projectId])
 }
 
-model SourceCodeEmbeddings {
+model SourceCodeEmbedding {
     id String @id @default(uuid())
 
     summaryEmbedding Unsupported("vector(768)")?

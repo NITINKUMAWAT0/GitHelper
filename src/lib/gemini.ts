@@ -1,7 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/prefer-optional-chain */
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const genAi = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+const genAi = new GoogleGenerativeAI(process.env.GEMINI_API_KEY ?? "AIzaSyCiVi7eQAEZmTB5b07UA4bJAuDr7YJYTNs");
 
 const model = genAi.getGenerativeModel({
   model: "gemini-1.5-flash",
@@ -50,48 +53,34 @@ Please summarise the following diff file:${diff}`,
   return response.response.text();
 };
 
-// Define your own Document interface or import it from the correct library
-interface CustomDocument {
-  pageContent?: string;
-  metadata?: {
-    source?: string;
-    [key: string]: unknown;
-  };
-}
-
-export async function summariseCode(doc: CustomDocument) {
+export async function summariseCode(doc: Document) {
+  console.log("getting summary for", doc.metadata.source);
+  
   try {
-    const sourceName = doc.metadata?.source ?? "unknown";
-
-    if (!doc || !doc.pageContent) {
-      throw new Error("Invalid document: missing pageContent");
-    }
-
-    const code = doc.pageContent.slice(0, 10000); // Trim to avoid long input
-
-    const result = await model.generateContent([
-      `You are a senior engineer explaining this file to a new developer.`,
-      `Summarize the purpose of the file: ${sourceName}. Code: \n\n${code}`,
-    ]);
-
-    return result.response.text();
-  } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error("Error generating content:", errorMessage);
-    throw new Error(`Failed to summarize code: ${errorMessage}`);
+      const code = doc.pageContent.slice(0, 10000); // Limit to 10000 characters
+      const response = await model.generateContent(
+          `You are an intelligent senior software engineer who specialises in onboarding junior software engineers onto projects.
+          You are onboarding a junior software engineer and explaining to them the purpose of the ${doc.metadata.source} file.
+          Here is the code:
+          ---
+          ${code}
+          ---
+          Give a summary no more than 100 words of the code above.`
+      );
+      return response.response.text();
+  } catch (error) {
+      console.error("error getting summary for", doc.metadata.source, error);
+      throw error; // Re-throw the error to handle it upstream
   }
 }
 
 export async function generateEmbedding(summary: string) {
-  try {
-    const model = genAi.getGenerativeModel({ model: "text-embedding-004" });
-    const result = await model.embedContent(summary);
-    const embedding = result.embedding;
-
-    console.log(`✅ Generated embedding with ${embedding.values.length} dimensions`);
-    return embedding.values;
-  } catch (error) {
-    console.error("❌ Error generating embedding:", error);
-    throw error;
-  }
+  const model = genAi.getGenerativeModel({
+      model: "text-embedding-004"
+  });
+  const result = await model.embedContent(summary);
+  const embedding = result.embedding;
+  return embedding.values;
 }
+
+// console.log(await generateEmbedding("hello world"));
