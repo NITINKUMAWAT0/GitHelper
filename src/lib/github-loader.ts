@@ -47,19 +47,31 @@ export const indexGithubRepo = async (
     githubUrl: string,
     githubToken?: string
   ) => {
+    console.log(`Starting indexing for GitHub repo: ${githubUrl}`);
+    
     const docs = await loadGithubRepo(githubUrl, githubToken);
+    console.log(`Loaded ${docs.length} files from repository`);
+    
     const allEmbeddings = await generateEmbeddings(docs);
+    console.log(`Generated embeddings for ${allEmbeddings.length} files`);
   
+    let successCount = 0;
+    let errorCount = 0;
+    
     await Promise.allSettled(
       allEmbeddings.map(async (embeddingObj, index) => {
         console.log(`Processing ${index + 1} of ${allEmbeddings.length}`);
-  
+        
         // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
-        if (!embeddingObj || !embeddingObj.embedding) return;
-  
+        if (!embeddingObj || !embeddingObj.embedding) {
+          console.log(`Skipping index ${index} - missing embedding data`);
+          return;
+        }
+        
         const { summary, embedding, sourceCode, fileName } = embeddingObj;
-  
+        
         try {
+          // Create the record without embedding first
           const sourceCodeEmbedding = await db.sourceCodeEmbeddings.create({
             data: {
               summary,
@@ -68,31 +80,54 @@ export const indexGithubRepo = async (
               projectId,
             },
           });
-  
+          
+          // Convert embedding array to proper format for PostgreSQL vector
+          // PostgreSQL vector extension expects a string representation of the array
+          const embeddingString = JSON.stringify(embedding);
+          
+          // Update with raw SQL using the correct conversion
           await db.$executeRaw`
             UPDATE "SourceCodeEmbeddings"
-            SET "summaryEmbedding" = ${embedding}::vector
+            SET "summaryEmbedding" = ${embeddingString}::vector
             WHERE "id" = ${sourceCodeEmbedding.id}
           `;
+          
+          successCount++;
+          console.log(`Successfully stored embedding for ${fileName}`);
         } catch (error) {
+          errorCount++;
           console.error(`Error processing index ${index}:`, error);
+          // Print the full error details for debugging
+          console.error(error);
+        }
+      })
+    );
+    
+    console.log(`Indexing complete. Success: ${successCount}, Errors: ${errorCount}`);
+    return { successCount, errorCount };
+  };
+  
+  const generateEmbeddings = async (docs: Document[]) => {
+    console.log(`Generating embeddings for ${docs.length} documents`);
+    
+    return await Promise.all(
+      docs.map(async (doc) => {
+        try {
+          const summary = await summariseCode(doc);
+          console.log(`Generated summary for ${doc.metadata.source}`);
+          
+          const embedding = await generateEmbedding(summary);
+          
+          return {
+            summary,
+            embedding,
+            sourceCode: doc.pageContent,
+            fileName: doc.metadata.source,
+          };
+        } catch (error) {
+          console.error(`Error generating embedding for ${doc.metadata.source}:`, error);
+          return null;
         }
       })
     );
   };
-  
-  const generateEmbeddings = async (docs: Document[]) => {
-    return await Promise.all(
-      docs.map(async (doc) => {
-        const summary = await summariseCode(doc);
-        const embedding = generateEmbedding(summary); // assumed renamed to avoid conflict
-        return {
-          summary,
-          embedding,
-          sourceCode: doc.pageContent,
-          fileName: doc.metadata.source,
-        };
-      })
-    );
-  };
-  

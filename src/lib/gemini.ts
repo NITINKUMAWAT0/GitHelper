@@ -63,14 +63,14 @@ export async function summariseCode(doc: CustomDocument) {
   try {
     const sourceName = doc.metadata?.source ?? "unknown";
     console.log("getting summary for", sourceName);
-    
+
     // Check if doc and pageContent exist before accessing
     if (!doc || !doc.pageContent) {
       throw new Error("Invalid document: missing pageContent");
     }
-    
+
     const code = doc.pageContent.slice(0, 10000);
-    
+
     const result = await model.generateContent([
       `You are an intelligent senior software engineer who specialises in onboarding junior software engineer onto projects`,
       `You are onboarding a junior software engineer and explaining to them the purpose of the ${sourceName} file
@@ -81,7 +81,7 @@ export async function summariseCode(doc: CustomDocument) {
        
       Give a summary no more than 150 words of the code above`,
     ]);
-    
+
     return result.response.text();
   } catch (error: unknown) {
     // Type-safe error handling
@@ -90,15 +90,23 @@ export async function summariseCode(doc: CustomDocument) {
     throw new Error(`Failed to summarize code: ${errorMessage}`);
   }
 }
-
 export async function generateEmbedding(summary: string) {
-  const model = genAi.getGenerativeModel({
-    model: "text-embedding-004",
-  });
+  try {
+    const model = genAi.getGenerativeModel({
+      model: "text-embedding-004",
+    });
 
-  const result = await model.embedContent(summary);
-  const embedding = result.embedding
-  return embedding.values
+    const result = await model.embedContent(summary);
+    const embedding = result.embedding;
+
+    // Verify the embedding has the expected dimension
+    console.log(
+      `Generated embedding with ${embedding.values.length} dimensions`,
+    );
+
+    return embedding.values;
+  } catch (error) {
+    console.error("Error generating embedding:", error);
+    throw error;
+  }
 }
-
-console.log(await generateEmbedding("hello world"));
