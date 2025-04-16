@@ -11,17 +11,27 @@ import { generateEmbedding, summariseCode } from './gemini';
 import { db } from '@/server/db';
 
 export const loadGithubRepo = async (githubUrl: string, githubToken?: string) => {
-    console.log("Loading GitHub repo with token:", githubToken?.slice(0, 5), '...');
-
-    const loader = new GithubRepoLoader(githubUrl, {
-        accessToken: githubToken ?? '',
-        branch: 'main',
+    // Remove logging the token for security reasons or just log that a token exists
+    console.log("Loading GitHub repo with token:", githubToken ? "Token provided" : "No token");
+    
+    // Validate the token before using it
+    if (!githubToken || githubToken.trim() === '') {
+        throw new Error("Valid GitHub token is required");
+    }
+    
+    // Format the URL properly
+    const formattedUrl = githubUrl.endsWith('/') ? githubUrl.slice(0, -1) : githubUrl;
+    
+    const loader = new GithubRepoLoader(formattedUrl, {
+        accessToken: githubToken,
+        // Use undefined to let the loader detect the default branch
+        branch: undefined,
         ignoreFiles: ['package-lock.json', 'yarn.lock', 'pnpm-lock.yaml', 'bun-lockb'],
         recursive: true,
         unknown: 'warn',
         maxConcurrency: 5
     });
-
+    
     try {
         const docs = await loader.load();
         console.log("Docs loaded:", docs.length);
