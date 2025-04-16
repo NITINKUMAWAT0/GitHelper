@@ -106,7 +106,7 @@ export const pollCommits = async (projectId: string) => {
     return commits;
   } catch (error) {
     console.error(`Error polling commits for project ${projectId}:`, error);
-    return { count: 0, error: error.message };
+    return { count: 0, error: Error};
   }
 };
 

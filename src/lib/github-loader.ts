@@ -11,20 +11,26 @@ import { generateEmbedding, summariseCode } from './gemini';
 import { db } from '@/server/db';
 
 export const loadGithubRepo = async (githubUrl: string, githubToken?: string) => {
+    console.log("Loading GitHub repo with token:", githubToken?.slice(0, 5), '...');
+
     const loader = new GithubRepoLoader(githubUrl, {
-        accessToken:githubToken ?? '',
-        branch:'main',
-        ignoreFiles:['package-lock.json', 'yarn.lock', 'pnpm-lock.yaml','bun-lockb' ],
-        recursive:true,
-        unknown:'warn',
-        maxConcurrency:5
-    })
-    const docs = await loader.load();
+        accessToken: githubToken ?? '',
+        branch: 'main',
+        ignoreFiles: ['package-lock.json', 'yarn.lock', 'pnpm-lock.yaml', 'bun-lockb'],
+        recursive: true,
+        unknown: 'warn',
+        maxConcurrency: 5
+    });
 
-    return docs;
-}
-
-console.log(await loadGithubRepo("https://github.com/NITINKUMAWAT0/URL-SHORTENER-APPLICATION"));
+    try {
+        const docs = await loader.load();
+        console.log("Docs loaded:", docs.length);
+        return docs;
+    } catch (error) {
+        console.error("Failed to load GitHub repo:", error);
+        throw error;
+    }
+};
 
 export const indexGithubRepo = async (
     projectId: string,
