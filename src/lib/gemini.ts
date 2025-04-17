@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
+/* eslint-disable @typescript-eslint/no-base-to-string */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { Document } from "@langchain/core/documents"; 
 
@@ -50,25 +53,27 @@ Please summarise the following diff file:${diff}`,
   return response.response.text();
 };
 
+export async function summariseCode(doc: Document<Record<string, unknown>>) {
+  const filename = doc.metadata?.source ?? "unknown file";
+  const code = doc.pageContent?.slice(0, 100000); // Truncate if needed for model limits
 
-export async function summariseCode(doc: Document) {
-  console.log("getting summary for", doc.metadata.source);
-  
+  console.log("Getting summary for:", filename);
+
   try {
-      const code = doc.pageContent.slice(0, 100000);
-      const response = await model.generateContent(
-          `You are an intelligent senior software engineer who specialises in onboarding junior software engineers onto projects.
-          You are onboarding a junior software engineer and explaining to them the purpose of the ${doc.metadata.source} file.
-          Here is the code:
-          ---
-          ${code}
-          ---
-          Give a summary no more than 1000 words of the code above.`
-      );
-      return response.response.text();
+    const response = await model.generateContent(
+      `You are an intelligent senior software engineer who specializes in onboarding junior software engineers onto projects.
+You are onboarding a junior developer and explaining the purpose of the file ${filename}.
+Here is the code:
+---
+${code}
+---
+Provide a clear and concise summary of the file's purpose, structure, and key logic. Keep it under 1000 words.`
+    );
+
+    return response.response.text();
   } catch (error) {
-      console.error("error getting summary for", doc.metadata.source, error);
-      throw error;
+    console.error("Error getting summary for", filename, error);
+    throw error;
   }
 }
 

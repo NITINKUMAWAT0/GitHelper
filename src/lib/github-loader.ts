@@ -51,7 +51,10 @@
 
   const generateEmbeddings = async (docs: Document<Record<string, any>>[]) => {
     return await Promise.all(docs.map(async (doc) => {
-      const summary = await summariseCode(doc);
+      const summary = await summariseCode({
+        code: doc.pageContent,
+        fileName: doc.metadata?.source ?? "unknown file",
+      });
       const embedding = await generateEmbedding(summary);
       return {
         summary,
