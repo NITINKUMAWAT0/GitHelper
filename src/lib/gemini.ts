@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/prefer-optional-chain */
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { Document } from "@langchain/core/documents"; 
 
 const genAi = new GoogleGenerativeAI(process.env.GEMINI_API_KEY ?? "AIzaSyCiVi7eQAEZmTB5b07UA4bJAuDr7YJYTNs");
 
@@ -57,7 +58,7 @@ export async function summariseCode(doc: Document) {
   console.log("getting summary for", doc.metadata.source);
   
   try {
-      const code = doc.pageContent.slice(0, 10000); // Limit to 10000 characters
+      const code = doc.pageContent.slice(0, 20000); // Limit to 20000 characters
       const response = await model.generateContent(
           `You are an intelligent senior software engineer who specialises in onboarding junior software engineers onto projects.
           You are onboarding a junior software engineer and explaining to them the purpose of the ${doc.metadata.source} file.
@@ -65,7 +66,7 @@ export async function summariseCode(doc: Document) {
           ---
           ${code}
           ---
-          Give a summary no more than 100 words of the code above.`
+          Give a summary no more than 500 words of the code above.`
       );
       return response.response.text();
   } catch (error) {

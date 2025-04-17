@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
@@ -5,6 +6,7 @@
 import { db } from '@/server/db';
 import { GithubRepoLoader } from '@langchain/community/document_loaders/web/github';
 import { generateEmbedding, summariseCode } from './gemini';
+import { Document } from 'langchain/document';
 
 export const loadGithubRepo = async (githubUrl: string, _githubToken?: string) => {
   const loader = new GithubRepoLoader(githubUrl, {
@@ -43,15 +45,15 @@ export const indexGithubRepo = async (projectId: string, githubUrl: string, gith
   }));
 };
 
-const generateEmbeddings = async (docs: Document[]) => {
-  return await Promise.all(docs.map(async doc => {
-      const summary = await summariseCode(doc);
-      const embedding = await generateEmbedding(summary);
-      return {
-          summary,
-          embedding,
-          sourceCode: JSON.parse(JSON.stringify(doc.pageContent)),
-          fileName: doc.metadata.source,
-      };
+const generateEmbeddings = async (docs: Document<Record<string, any>>[]) => {
+  return await Promise.all(docs.map(async (doc) => {
+    const summary = await summariseCode(doc);
+    const embedding = await generateEmbedding(summary);
+    return {
+      summary,
+      embedding,
+      sourceCode: doc.pageContent,
+      fileName: doc.metadata?.source,
+    };
   }));
 };
