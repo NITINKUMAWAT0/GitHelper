@@ -21,9 +21,10 @@
     "typecheck": "tsc --noEmit",
     "github": "tsx src/lib/github.ts",
     "gemini": "tsx src/lib/gemini.ts",
-    "githubloader":"tsx src/lib/github-loader.ts"
+    "githubloader": "tsx src/lib/github-loader.ts"
   },
   "dependencies": {
+    "@ai-sdk/google": "^1.2.11",
     "@clerk/nextjs": "^6.13.0",
     "@google/generative-ai": "^0.24.0",
     "@hookform/resolvers": "^5.0.1",
@@ -51,6 +52,7 @@
     "@trpc/client": "^11.0.2",
     "@trpc/react-query": "^11.0.2",
     "@trpc/server": "^11.0.2",
+    "ai": "^4.3.9",
     "axios": "^1.8.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

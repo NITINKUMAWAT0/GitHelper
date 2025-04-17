@@ -4,6 +4,7 @@ import React from 'react'
 import { ExternalLink, Github } from 'lucide-react'
 import Link from 'next/link'
 import CommitLogs from './commit-log';
+import AskQuestionCard from './ask-question-card'
 
 const Dashboard = () => {
   const { projects = [], projectId } = useProject() || {}
@@ -40,7 +41,7 @@ const Dashboard = () => {
 
       <div className="mt-4">
         <div className='grid grid-cols-1 gap-4 sm:grid-cols-5'>
-          Ask Question Card
+          <AskQuestionCard/>
           Meeting Card
         </div>
       </div>
