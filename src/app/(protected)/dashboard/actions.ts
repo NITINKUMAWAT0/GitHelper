@@ -1,7 +1,6 @@
 "use server";
 
 import { streamText } from "ai";
-import { createStreamableValue } from "ai/rsc";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { generateEmbedding } from "@/lib/gemini";
 import { db } from "@/server/db";
@@ -11,17 +10,15 @@ const google = createGoogleGenerativeAI({
 });
 
 export async function askQuestion(question: string, projectId: string) {
-  const stream = createStreamableValue();
-
   // Generate vector for the user question
   const queryVector = await generateEmbedding(question);
   const vectorQuery = `[${queryVector.join(",")}]`;
 
   // Query the database for relevant context
   const result = await db.$queryRaw<
-    { fileName: string; soucreCode: string; summary: string }[]
+    { fileName: string; sourceCode: string; summary: string }[]
   >`
-    SELECT "fileName", "soucreCode", "summary",
+    SELECT "fileName", "sourceCode", "summary",
     1 - ("summaryEmbedding" <=> ${vectorQuery}::vector) AS similarity
     FROM "SourceCodeEmbedding"
     WHERE 1 - ("summaryEmbedding" <=> ${vectorQuery}::vector) > 0.5
@@ -30,18 +27,13 @@ export async function askQuestion(question: string, projectId: string) {
     LIMIT 5
   `;
 
-  // Prepare context from top matches
   const context = result
-    .map(
-      (doc) => `source: ${doc.fileName}\ncode: ${doc.soucreCode}\n\n`
-    )
+    .map((doc) => `source: ${doc.fileName}\ncode: ${doc.sourceCode}\n\n`)
     .join("");
 
-  // Start AI stream in the background
-  await (async () => {
-    const { textStream } =  streamText({
-      model: google("models/gemini-1.5-flash"),
-      prompt: `
+  const { textStream } =  streamText({
+    model: google("models/gemini-1.5-flash"),
+    prompt: `
 You are an AI code assistant who answers questions about the codebase. Your target audience is a technical intern who needs clear, helpful guidance.
 
 AI assistant is a brand new, powerful, human-like artificial intelligence.
@@ -65,18 +57,17 @@ AI assistant will not apologize for previous responses, but instead will indicat
 AI assistant will not invent anything that is not drawn directly from the context.
 
 Answer in markdown syntax, with code snippets if needed. Be as detailed as possible when answering. Make sure there is no confusion.
-      `,
-    });
+    `,
+  });
 
-    for await (const delta of textStream) {
-      stream.update(delta);
-    }
+  let fullAnswer = "";
 
-    stream.done();
-  })();
+  for await (const delta of textStream) {
+    fullAnswer += delta;
+  }
 
   return {
-    output: stream,
+    answer: fullAnswer,
     filesReferences: result,
   };
 }
