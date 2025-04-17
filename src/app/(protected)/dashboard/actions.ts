@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/await-thenable */
 "use server";
 
 import { streamText } from "ai";
@@ -21,17 +22,17 @@ export async function askQuestion(question: string, projectId: string) {
     SELECT "fileName", "sourceCode", "summary",
     1 - ("summaryEmbedding" <=> ${vectorQuery}::vector) AS similarity
     FROM "SourceCodeEmbedding"
-    WHERE 1 - ("summaryEmbedding" <=> ${vectorQuery}::vector) > 0.5
+    WHERE 1 - ("summaryEmbedding" <=> ${vectorQuery}::vector) > 0.3
     AND "projectId" = ${projectId}
     ORDER BY similarity DESC
-    LIMIT 5
+    LIMIT 10
   `;
 
   const context = result
     .map((doc) => `source: ${doc.fileName}\ncode: ${doc.sourceCode}\n\n`)
     .join("");
 
-  const { textStream } =  streamText({
+  const { textStream } = await streamText({
     model: google("models/gemini-1.5-flash"),
     prompt: `
 You are an AI code assistant who answers questions about the codebase. Your target audience is a technical intern who needs clear, helpful guidance.

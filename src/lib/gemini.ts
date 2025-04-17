@@ -50,11 +50,12 @@ Please summarise the following diff file:${diff}`,
   return response.response.text();
 };
 
+
 export async function summariseCode(doc: Document) {
   console.log("getting summary for", doc.metadata.source);
   
   try {
-      const code = doc.pageContent.slice(0, 20000); // Limit to 20000 characters
+      const code = doc.pageContent.slice(0, 100000);
       const response = await model.generateContent(
           `You are an intelligent senior software engineer who specialises in onboarding junior software engineers onto projects.
           You are onboarding a junior software engineer and explaining to them the purpose of the ${doc.metadata.source} file.
@@ -62,12 +63,12 @@ export async function summariseCode(doc: Document) {
           ---
           ${code}
           ---
-          Give a summary no more than 500 words of the code above.`
+          Give a summary no more than 1000 words of the code above.`
       );
       return response.response.text();
   } catch (error) {
       console.error("error getting summary for", doc.metadata.source, error);
-      throw error; // Re-throw the error to handle it upstream
+      throw error;
   }
 }
 
