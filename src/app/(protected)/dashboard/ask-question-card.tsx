@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-misused-promises */
+ /* eslint-disable @typescript-eslint/no-misused-promises */
 'use client'
 
 import React from 'react'
@@ -32,7 +32,13 @@ const AskQuestionCard = () => {
 
     const { answer, filesReferences } = await askQuestion(question, project.id)
     setAnswer(answer)
-    setFilesReferences(filesReferences)
+    setFilesReferences(
+      filesReferences.map((file) => ({
+        fileName: file.fileName,
+        sourceCode: file.sourceCode ?? '',
+        summary: file.summary ?? '',
+      }))
+    )
 
     setLoading(false)
   }
