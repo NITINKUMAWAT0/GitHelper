@@ -1,4 +1,4 @@
- /* eslint-disable @typescript-eslint/no-misused-promises */
+/* eslint-disable @typescript-eslint/no-misused-promises */
 'use client'
 
 import React from 'react'
@@ -11,6 +11,8 @@ import { DialogTitle } from '@radix-ui/react-dialog'
 import GithubLogo from '@/app/images/GithubLogo.png'
 import Image from 'next/image'
 import { askQuestion } from './actions'
+import MDEditor from "@uiw/react-md-editor"
+import { type } from '../../../server/api/root';
 
 const AskQuestionCard = () => {
   const { project } = useProject()
@@ -23,14 +25,16 @@ const AskQuestionCard = () => {
   const [answer, setAnswer] = React.useState('')
 
   const onSubmit = async (e: React.FormEvent) => {
+    setAnswer('')
+    setFilesReferences([])
     e.preventDefault()
-
     if (!project?.id) return
 
     setLoading(true)
     setOpen(true)
 
     const { answer, filesReferences } = await askQuestion(question, project.id)
+    setOpen(true)
     setAnswer(answer)
     setFilesReferences(
       filesReferences.map((file) => ({
@@ -46,23 +50,32 @@ const AskQuestionCard = () => {
   return (
     <>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-2xl ">
           <DialogHeader>
-            <DialogTitle>
-              <Image src={GithubLogo} alt="logo" width={40} height={40} />
+            <DialogTitle className="flex items-center gap-2">
+              <Image src={GithubLogo} alt="GitHub logo" width={40} height={40} />
+              <span className="text-lg font-medium">GitHub Response</span>
             </DialogTitle>
           </DialogHeader>
 
-          <div className="whitespace-pre-wrap text-sm text-muted-foreground">
-            {loading ? 'Thinking...' : answer}
-          </div>
+          <div className="border rounded-md mt-4">
+          {loading ? (
+            <div className="flex items-center justify-center py-8 p-4">
+              <div className="text-muted-foreground">Thinking...</div>
+            </div>
+          ) : (
+            <MDEditor.Markdown 
+              source={answer} 
+              className="max-h-100 overflow-y-auto p-4" 
+            />
+          )}
+        </div>
 
-          <h1 className="mt-4 font-semibold text-base">File References</h1>
-          <ul className="text-xs text-muted-foreground list-disc ml-4">
-            {filesReferences.map((file) => (
-              <li key={file.fileName}>{file.fileName}</li>
-            ))}
-          </ul>
+          <div className="flex justify-end mt-4">
+            <Button onClick={() => setOpen(false)} type="button">
+              Close
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
 
