@@ -8,7 +8,7 @@ interface Props {
 }
 
 const CodeReferences = ({ filesReferences }: Props) => {
-  const [tab, setTab] = React.useState(filesReferences[0].fileName);
+  const [tab, setTab] = React.useState(filesReferences[0]?.fileName ?? '');
 
   const selectedFile = filesReferences.find((file) => file.fileName === tab);
 
