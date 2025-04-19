@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Tabs } from '@/components/ui/tabs';
+import { Tabs} from '@/components/ui/tabs';
 import React from 'react';
 import { cn } from '@/lib/utils'; // Ensure your project has a `cn` utility
 
@@ -9,8 +9,6 @@ interface Props {
 
 const CodeReferences = ({ filesReferences }: Props) => {
   const [tab, setTab] = React.useState(filesReferences[0]?.fileName ?? '');
-
-  const selectedFile = filesReferences.find((file) => file.fileName === tab);
 
   return (
     <Tabs value={tab} onValueChange={setTab} className="w-full">
@@ -29,16 +27,6 @@ const CodeReferences = ({ filesReferences }: Props) => {
             {file.fileName}
           </Button>
         ))}
-      </div>
-
-      <div className="mt-4 p-4 bg-gray-100 rounded-md">
-        <h2 className="text-lg font-semibold mb-2">{selectedFile?.fileName}</h2>
-        <pre className="bg-white p-4 rounded overflow-x-auto text-sm">
-          <code>{selectedFile?.sourceCode}</code>
-        </pre>
-        <div className="mt-4 text-sm text-muted-foreground">
-          <strong>Summary:</strong> {selectedFile?.summary}
-        </div>
       </div>
     </Tabs>
   );

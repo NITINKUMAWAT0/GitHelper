@@ -12,7 +12,7 @@ import GithubLogo from '@/app/images/GithubLogo.png'
 import Image from 'next/image'
 import { askQuestion } from './actions'
 import MDEditor from "@uiw/react-md-editor"
-import { type } from '../../../server/api/root';
+import CodeReferences from './code-references'
 
 const AskQuestionCard = () => {
   const { project } = useProject()
@@ -64,10 +64,12 @@ const AskQuestionCard = () => {
               <div className="text-muted-foreground">Thinking...</div>
             </div>
           ) : (
-            <MDEditor.Markdown 
-              source={answer} 
-              className="max-h-100 overflow-y-auto p-4" 
-            />
+            <>
+            <MDEditor.Markdown
+                  source={answer}
+                  className="max-h-100 overflow-y-auto p-4 mb-4" />
+                  <CodeReferences filesReferences={filesReferences}/>
+                  </>
           )}
         </div>
 
