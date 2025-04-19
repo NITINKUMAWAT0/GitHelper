@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-misused-promises */
 'use client'
 
@@ -13,6 +14,8 @@ import Image from 'next/image'
 import { askQuestion } from './actions'
 import MDEditor from "@uiw/react-md-editor"
 import CodeReferences from './code-references'
+import { api } from '@/trpc/react'
+import { toast } from 'sonner'
 
 const AskQuestionCard = () => {
   const { project } = useProject()
@@ -23,6 +26,7 @@ const AskQuestionCard = () => {
     { fileName: string; sourceCode: string; summary: string }[]
   >([])
   const [answer, setAnswer] = React.useState('')
+  const saveAnswer = api.project.saveAnswer.useMutation()
 
   const onSubmit = async (e: React.FormEvent) => {
     setAnswer('')
@@ -47,31 +51,61 @@ const AskQuestionCard = () => {
     setLoading(false)
   }
 
+  const handleSaveAnswer = () => {
+    if (!project?.id) return;
+    
+    saveAnswer.mutate({
+      projectId: project.id,
+      question,
+      answer,
+      filesReferences: filesReferences, // Pass the object directly, not as JSON string
+    }, {
+      onSuccess: () => {
+        toast.success('Answer saved successfully!')
+        setOpen(false)
+      },
+      onError: (error) => {
+        console.error('Save error:', error)
+        toast.error('Failed to save answer')
+      }
+    })
+  }
+
   return (
     <>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-2xl ">
+        <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Image src={GithubLogo} alt="GitHub logo" width={40} height={40} />
-              <span className="text-lg font-medium">GitHub Response</span>
-            </DialogTitle>
+            <div className='flex items-center gap-2'>
+              <DialogTitle className="flex items-center gap-2">
+                <Image src={GithubLogo} alt="GitHub logo" width={40} height={40} />
+                <span className="text-lg font-medium">GitHub Response</span>
+              </DialogTitle>
+              <Button 
+                disabled={saveAnswer.isPending} 
+                variant={'outline'} 
+                onClick={handleSaveAnswer}
+              >
+                Save Answer
+              </Button>
+            </div>
           </DialogHeader>
 
           <div className="border rounded-md mt-4">
-          {loading ? (
-            <div className="flex items-center justify-center py-8 p-4">
-              <div className="text-muted-foreground">Thinking...</div>
-            </div>
-          ) : (
-            <>
-            <MDEditor.Markdown
+            {loading ? (
+              <div className="flex items-center justify-center py-8 p-4">
+                <div className="text-muted-foreground">Thinking...</div>
+              </div>
+            ) : (
+              <>
+                <MDEditor.Markdown
                   source={answer}
-                  className="max-h-100 overflow-y-auto p-4 mb-4" />
-                  <CodeReferences filesReferences={filesReferences}/>
-                  </>
-          )}
-        </div>
+                  className="max-h-100 overflow-y-auto p-4 mb-4" 
+                />
+                <CodeReferences filesReferences={filesReferences}/>
+              </>
+            )}
+          </div>
 
           <div className="flex justify-end mt-4">
             <Button onClick={() => setOpen(false)} type="button">

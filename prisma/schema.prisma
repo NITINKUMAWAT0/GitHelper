@@ -67,7 +67,7 @@ model Question {
   question  String
   answer    String
 
-  fileReference Json
+  fileReference Json?
 
   projectId String
   project   Project  @relation(fields: [projectId], references: [id])

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
@@ -18,6 +19,7 @@ export const projectRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      console.log('Available models on ctx.db:', Object.keys(ctx.db))
       const { name, githubUrl, githubToken } = input;
 
       const project = await ctx.db.project.create({
@@ -54,20 +56,39 @@ export const projectRouter = createTRPCRouter({
       return await ctx.db.commit.findMany({ where: {projectId: input.projectId}})
     }),
 
-    saveAnswer: protectedProcedure.input(z.object({
-      projectId: z.string(),
-      question: z.string(),
-      answer: z.string(),
-      filesReferences: z.any()
-    })).mutation(async ({ctx, input}) => {
-      return await ctx.db.question.create({
-        data: {
-          answer: input.answer,
-          fileReference: input.filesReferences,
-          projectId: input.projectId,
-          question: input.question,
-          userId: ctx.user.userId!
-        }
-      })
+    // First, let's add some debugging to see what's happening
+saveAnswer: protectedProcedure.input(z.object({
+  projectId: z.string(),
+  question: z.string(),
+  answer: z.string(),
+  filesReferences: z.array(
+    z.object({
+      fileName: z.string(),
+      sourceCode: z.string(),
+      summary: z.string()
     })
+  )
+})).mutation(async ({ctx, input}) => {
+  // Add debugging to see what ctx contains
+  console.log("Context DB:", ctx.db);
+  console.log("Context DB Question:", ctx.db?.question);
+  
+  if (!ctx.db) {
+    throw new Error("Database context is undefined");
+  }
+  
+  if (!ctx.db.question) {
+    throw new Error("Question model is not available on database context");
+  }
+  
+  return await ctx.db.question.create({
+    data: {
+      answer: input.answer,
+      fileReference: input.filesReferences,
+      projectId: input.projectId,
+      question: input.question,
+      userId: ctx.user.userId!
+    }
+  });
+})
 });
