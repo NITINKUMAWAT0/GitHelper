@@ -118,6 +118,8 @@ export async function askQuestion(
             randomFiles.map(f => `- ${f.fileName}`).join('\n'),
           filesReferences: randomFiles.map(f => ({
             fileName: f.fileName,
+            sourceCode: "No source code available",
+            summary: "No summary available",
             similarity: 0
           })),
         };
@@ -152,6 +154,8 @@ export async function askQuestion(
       answer: fullAnswer,
       filesReferences: results.map(doc => ({
         fileName: doc.fileName,
+        sourceCode: doc.sourceCode,
+        summary: doc.summary,
         similarity: doc.similarity
       })),
     };
