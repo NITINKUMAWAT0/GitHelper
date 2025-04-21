@@ -1,8 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { pollCommits } from "@/lib/github";
@@ -18,7 +14,7 @@ export const projectRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+       
       console.log('Available models on ctx.db:', Object.keys(ctx.db))
       const { name, githubUrl, githubToken } = input;
 
@@ -90,5 +86,21 @@ saveAnswer: protectedProcedure.input(z.object({
       userId: ctx.user.userId!
     }
   });
+}),
+
+getQuestion:protectedProcedure.input(z.object({
+  projectId:z.string()
+})).query(async({ctx,input})=>{
+  return await ctx.db.question.findMany({
+    where:{
+      projectId:input.projectId
+    },
+    include:{
+      user:true
+    },
+    orderBy:{
+      createdAt:'desc'
+    }
+  })
 })
 });
