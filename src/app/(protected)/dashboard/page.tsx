@@ -12,7 +12,7 @@ const Dashboard = () => {
 
   return (
     <div>
-      {projectId}
+      {/* {projectId} */}
       {currentProject?.githubUrl && (
         <div className='flex items-center justify-between flex-wrap gap-y-4'>
           {/* github link */}
@@ -20,7 +20,7 @@ const Dashboard = () => {
             <Github className='size-5 text-white' />
             <div className='ml-2'>
               <p className='text-sm font-medium text-white'>
-                This project is linked to{' '}
+                This project is linked to
                 <Link href={currentProject.githubUrl} target="_blank" rel="noopener noreferrer" className='inline-flex items-center text-white/80 hover:underline'>
                   {currentProject.githubUrl}
                   <ExternalLink className='ml-1 size-4' />
