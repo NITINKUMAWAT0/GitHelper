@@ -13,9 +13,10 @@ import GithubLogo from '@/app/images/GithubLogo.png'
 import Image from 'next/image'
 import { askQuestion } from './actions'
 import MDEditor from "@uiw/react-md-editor"
-import CodeReferences from './code-references'
+// import CodeReferences from './code-references'
 import { api } from '@/trpc/react'
 import { toast } from 'sonner'
+import useRefetch from '@/hooks/use-refetch'
 
 const AskQuestionCard = () => {
   const { project } = useProject()
@@ -53,15 +54,16 @@ const AskQuestionCard = () => {
 
   const handleSaveAnswer = () => {
     if (!project?.id) return;
-    
+
     saveAnswer.mutate({
       projectId: project.id,
       question,
       answer,
       filesReferences: filesReferences, // Pass the object directly, not as JSON string
     }, {
-      onSuccess: () => {
+      onSuccess: async () => {
         toast.success('Answer saved successfully!')
+        await refetch();
         setOpen(false)
       },
       onError: (error) => {
@@ -70,6 +72,8 @@ const AskQuestionCard = () => {
       }
     })
   }
+
+  const refetch = useRefetch();
 
   return (
     <>
@@ -81,9 +85,9 @@ const AskQuestionCard = () => {
                 <Image src={GithubLogo} alt="GitHub logo" width={40} height={40} />
                 <span className="text-lg font-medium">GitHub Response</span>
               </DialogTitle>
-              <Button 
-                disabled={saveAnswer.isPending} 
-                variant={'outline'} 
+              <Button
+                disabled={saveAnswer.isPending}
+                variant={'outline'}
                 onClick={handleSaveAnswer}
               >
                 Save Answer
@@ -91,19 +95,21 @@ const AskQuestionCard = () => {
             </div>
           </DialogHeader>
 
-          <div className="border rounded-md mt-4">
+          <div className="border rounded-md mt-4 overflow-hidden">
             {loading ? (
               <div className="flex items-center justify-center py-8 p-4">
                 <div className="text-muted-foreground">Thinking...</div>
               </div>
             ) : (
-              <>
-                <MDEditor.Markdown
-                  source={answer}
-                  className="max-h-100 overflow-y-auto p-4 mb-4" 
-                />
-                <CodeReferences filesReferences={filesReferences}/>
-              </>
+              <div className="overflow-hidden">
+                <div className="overflow-x-auto">
+                  <MDEditor.Markdown
+                    source={answer}
+                    className="max-h-100 overflow-y-auto p-4 mb-4 whitespace-pre-wrap"
+                  />
+                </div>
+                {/* <CodeReferences filesReferences={filesReferences}/> */}
+              </div>
             )}
           </div>
 

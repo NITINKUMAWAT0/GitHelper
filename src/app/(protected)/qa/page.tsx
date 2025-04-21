@@ -47,14 +47,19 @@ const QA = () => {
       </div>
       {
         question && (
-          <SheetContent className='sm:max-w-[80vw]'>
-            <SheetHeader>
-              <SheetTitle>
+          <SheetContent className="sm:max-w-[80vw] overflow-hidden flex flex-col h-full bg-gray-800">
+            <SheetHeader className="flex-shrink-0">
+              <SheetTitle className='text-white font-semibold text-lg'>
                 {question?.question}
               </SheetTitle>
-              <MDEditor.Markdown source={question?.answer} className='overflow-scroll'/>
-              {/* <CodeReferences filesReferences={question?.fileReference ?? [] as any} /> */}
             </SheetHeader>
+            <div className="flex-grow overflow-y-auto mt-4">
+              <MDEditor.Markdown
+                source={question?.answer}
+                className="px-10 py-10"
+              />
+              {/* <CodeReferences filesReferences={question?.fileReference ?? [] as any} /> */}
+            </div>
           </SheetContent>
         )
       }
