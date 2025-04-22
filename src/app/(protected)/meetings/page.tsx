@@ -31,7 +31,7 @@ const Meeting = () => {
                                                 meeting.name
                                             }
                                             {meeting.status === 'PROCESSING' && (
-                                                <Badge className='bg-yellow-500 text-white'>
+                                                <Badge className='bg-primary text-white'>
                                                     Processing...
                                                 </Badge>
                                             )}
@@ -43,7 +43,7 @@ const Meeting = () => {
                                     <p className='whitespace-nowrap'>
                                         {meeting.createdAt.toLocaleDateString()}
                                     </p>
-                                    <p className='truncate'>0 issues</p>
+                                    <p className='truncate'>{meeting.issues.length} issues</p>
 
                                 </div>
 
