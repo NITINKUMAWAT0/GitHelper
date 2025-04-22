@@ -58,7 +58,8 @@ export async function uploadFile(file: File, setProgress?: (progress: number) =>
         async () => {
           try {
             const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-            resolve(downloadURL);
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+            resolve(downloadURL as string);
           } catch (err) {
             console.error('Failed to get download URL:', err);
             reject(new Error('Failed to get download URL'));
