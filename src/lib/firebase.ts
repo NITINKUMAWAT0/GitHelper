@@ -15,7 +15,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyDt4PylNCB1sbeof2VzwU5DHaf5LfQHu6I",
   authDomain: "git-helper-4a125.firebaseapp.com",
   projectId: "git-helper-4a125",
-  storageBucket: "git-helper-4a125.appspot.com", // Fixed the storage bucket URL
+  storageBucket: "git-helper-4a125.firebasestorage.app", // Fixed the storage bucket URL
   messagingSenderId: "789513178567",
   appId: "1:789513178567:web:cd1afb6ba6555beb429de2",
   measurementId: "G-D70VCHT6RV"
@@ -23,6 +23,9 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+
+// Export what you need
+export const storage = getStorage(app);
 
 // Only initialize analytics if you need it
 // const analytics = getAnalytics(app);
@@ -49,23 +52,24 @@ export async function uploadFile(file: File, setProgress?: (progress: number) =>
           }
         },
         (error) => {
-          reject(error);
+          console.error('Upload failed:', error.code, error.message);
+          reject(new Error(`Upload failed: ${error.code} - ${error.message}`));
         },
         async () => {
-          await getDownloadURL(uploadTask.snapshot.ref)
-            .then((downloadURL: unknown) => {
-              resolve(downloadURL);
-            });
+          try {
+            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+            resolve(downloadURL);
+          } catch (err) {
+            console.error('Failed to get download URL:', err);
+            reject(new Error('Failed to get download URL'));
+          }
         }
       );
-    } catch (error) {
-      console.log(error);
-      reject(error);
+    } catch (err) {
+      console.error('Unexpected upload error:', err);
+      reject(new Error('Unexpected upload error'));
     }
   });
 }
 
-// Export what you need
-export const storage = getStorage(app);
 export default app; // Export the app instance for use in other components
-
