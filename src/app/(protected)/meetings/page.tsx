@@ -55,7 +55,10 @@ const Meetings = () => {
       {
         isUploading && (
           <div className="flex items-center justify-center">
-            <CircularProgressbar value={progress} text={`${progress}%`}  className="size-20" />
+            <CircularProgressbar value={progress} text={`${progress}%`}  className="size-20" styles={buildStyles({
+              pathColor:"8C65F2",
+              textColor: "#8C65F2",
+            })}/>
             <p className="text-sm text-gray-500 text-center">Uploading your meeting...</p>
           </div>
         )
