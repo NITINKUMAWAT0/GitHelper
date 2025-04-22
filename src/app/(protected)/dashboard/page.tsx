@@ -5,7 +5,7 @@ import { ExternalLink, Github } from 'lucide-react'
 import Link from 'next/link'
 import CommitLogs from './commit-log';
 import AskQuestionCard from './ask-question-card'
-import MeetingsCard from '../meetings/page'
+import MeetingsCard from '../meetings/meetingCard'
 
 const Dashboard = () => {
   const { projects = [], projectId } = useProject() || {}
