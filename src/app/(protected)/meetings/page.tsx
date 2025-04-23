@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 'use client'
 
@@ -8,12 +9,15 @@ import MeetingCard from './meetingCard';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+import useRefetch from '@/hooks/use-refetch';
 
 const Meeting = () => {
     const { projectId } = useProject();
     const { data: meetings, isLoading } = api.project.getMeetings.useQuery({ projectId }, {
         refetchInterval: 4000
     })
+    const refetch = useRefetch()
     const deleteMeeting = api.project.deleteMeeting.useMutation()
     return (
         <>
@@ -47,12 +51,21 @@ const Meeting = () => {
                             </div>
                             
                             <div className="flex-shrink-0 ml-4">
-                                <Link href={`/meeting/${meeting.id}`}>
+                                <Link href={`/meetings/${meeting.id}`}>
                                     <Button variant='outline' className='text-xs'>
                                         View meeting
                                     </Button>
                                 </Link>
-                                <Button disabled={deleteMeeting.isPending} variant='destructive' onClick={()=> deleteMeeting.mutate({meetingId:meeting.id})} className='ml-2'>
+                                <Button 
+                                disabled={deleteMeeting.isPending}
+                                variant='destructive' 
+                                onClick={()=> deleteMeeting.mutate({meetingId:meeting.id}, {
+                                    onSuccess:async () => {
+                                        toast.success("Meeting deleted successfully")
+                                      await refetch()
+                                    }
+                                })} 
+                                className='ml-2'>
                                     Delete Meeting
                                 </Button>
                             </div>
