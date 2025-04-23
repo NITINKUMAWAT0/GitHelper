@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 'use client'
 
 import React from 'react'
@@ -13,6 +14,7 @@ const Meeting = () => {
     const { data: meetings, isLoading } = api.project.getMeetings.useQuery({ projectId }, {
         refetchInterval: 4000
     })
+    const deleteMeeting = api.project.deleteMeeting.useMutation()
     return (
         <>
             <MeetingCard />
@@ -50,6 +52,9 @@ const Meeting = () => {
                                         View meeting
                                     </Button>
                                 </Link>
+                                <Button disabled={deleteMeeting.isPending} variant='destructive' onClick={()=> deleteMeeting.mutate({meetingId:meeting.id})} className='ml-2'>
+                                    Delete Meeting
+                                </Button>
                             </div>
                         </li>
                     ))}
