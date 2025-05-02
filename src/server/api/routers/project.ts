@@ -133,7 +133,7 @@ export const projectRouter = createTRPCRouter({
           name: input.name,
           status: "PROCESSING",
         },
-      })
+      });
       return meeting;
     }),
   getMeetings: protectedProcedure
@@ -152,29 +152,43 @@ export const projectRouter = createTRPCRouter({
         },
       });
     }),
-    deleteMeeting: protectedProcedure
+  deleteMeeting: protectedProcedure
     .input(z.object({ meetingId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       // Step 1: Delete all issues linked to this meeting
       await ctx.db.issue.deleteMany({
         where: { meetingId: input.meetingId },
       });
-  
+
       // Step 2: Now delete the meeting
       return await ctx.db.meeting.delete({
         where: { id: input.meetingId },
       });
     }),
 
-    getMeetingById: protectedProcedure.input(z.object({ meetingId: z.string() })).query(async ({ ctx, input }) => {
+  getMeetingById: protectedProcedure
+    .input(z.object({ meetingId: z.string() }))
+    .query(async ({ ctx, input }) => {
       return await ctx.db.meeting.findUnique({
-        where:{
-          id: input.meetingId
-        }, include:{
+        where: {
+          id: input.meetingId,
+        },
+        include: {
           issues: true,
-        }
-    })
-  
-}),
+        },
+      });
+    }),
 
-})
+  archiveProject: protectedProcedure
+    .input(z.object({ ProjectId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.db.project.update({
+        where: {
+          id: input.ProjectId,
+        },
+        data: {
+          deletedAt: new Date(),
+        },
+      });
+    }),
+});
