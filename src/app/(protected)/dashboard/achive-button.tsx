@@ -1,4 +1,7 @@
-'use client'
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+'use client';
 
 import { Button } from '@/components/ui/button';
 import useRefetch from '@/hooks/use-refetch';
@@ -8,15 +11,15 @@ import React from 'react';
 import { toast } from 'sonner';
 
 const ArchiveButton = () => {
-  const archiveProject = api.project.archiveProject.useMutation();
-  const { projectId } = useProject();
+  const archivedProject = api.project.archiveProject.useMutation();
+  const { projectId } = useProject()
   const refetch = useRefetch();
 
   const handleArchive = () => {
     const userConfirmed = window.confirm('Are you sure you want to archive this project?');
     if (!userConfirmed) return;
 
-    archiveProject.mutate(
+    archivedProject.mutate(
       { ProjectId: projectId },
       {
         onSuccess: () => {
@@ -32,7 +35,7 @@ const ArchiveButton = () => {
 
   return (
     <Button
-      disabled={archiveProject.isPending}
+      disabled={archivedProject.isPending}
       size="sm"
       variant="destructive"
       onClick={handleArchive}

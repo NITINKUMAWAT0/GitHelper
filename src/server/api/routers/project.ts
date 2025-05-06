@@ -191,4 +191,48 @@ export const projectRouter = createTRPCRouter({
         },
       });
     }),
+
+getArchivedProjects: protectedProcedure.query(async ({ ctx }) => {
+  return ctx.db.project.findMany({
+    where: {
+      userToProject: {
+        some: {
+          userId: ctx.user.userId!,
+        },
+      },
+      deletedAt: {
+        not: null
+      },
+    },
+    orderBy: {
+      deletedAt: 'desc', 
+    },
+  });
+}),
+
+restoreProject: protectedProcedure
+  .input(z.object({ ProjectId: z.string() }))
+  .mutation(async ({ ctx, input }) => {
+    return await ctx.db.project.update({
+      where: {
+        id: input.ProjectId,
+      },
+      data: {
+        deletedAt: null,
+      },
+    });
+  }),
+
+  getTeamMembers: protectedProcedure
+    .input(z.object({ projectId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      return await ctx.db.userToProject.findMany({
+        where: {
+          projectId: input.projectId,
+        },
+        include: {
+          user: true,
+        },
+      });
+    }),
 });

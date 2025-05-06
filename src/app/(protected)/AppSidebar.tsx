@@ -15,7 +15,7 @@ import {
   useSidebar 
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
-import { Bot, CreditCard, LayoutDashboardIcon, Plus, Presentation } from "lucide-react";
+import { Archive, Bot, CreditCard, LayoutDashboardIcon, Plus, Presentation } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
@@ -27,7 +27,11 @@ const items = [
         title: "Dashboard",
         url: "/dashboard",
         icon: LayoutDashboardIcon
-    }, {
+    },{
+        title: "Archives",
+        url:"/archives",
+        icon: Archive
+    },{
         title: "Q&A",
         url: "/qa",
         icon: Bot

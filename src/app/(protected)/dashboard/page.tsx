@@ -8,6 +8,7 @@ import AskQuestionCard from './ask-question-card'
 import MeetingsCard from '../meetings/meetingCard'
 import ArchiveButton from './achive-button'
 import InviteButton from './invite-button'
+import TeamMembers from './team-members'
 
 const Dashboard = () => {
   const { projects = [], projectId } = useProject() || {}
@@ -35,23 +36,23 @@ const Dashboard = () => {
           <div className="h-4"></div>
 
           <div className='flex items-center gap-4'>
-            Team Members
-            <InviteButton/>
-            <ArchiveButton/>
+            <TeamMembers />
+            <InviteButton />
+            <ArchiveButton />
           </div>
         </div>
       )}
 
       <div className="mt-4">
         <div className='grid grid-cols-1 gap-4 sm:grid-cols-5'>
-          <AskQuestionCard/>
-          <MeetingsCard/>
+          <AskQuestionCard />
+          <MeetingsCard />
         </div>
       </div>
 
       <div className='mt-8'></div>
 
-      <CommitLogs/>
+      <CommitLogs />
     </div>
   )
 }
