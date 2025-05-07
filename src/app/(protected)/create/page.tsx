@@ -29,7 +29,7 @@ const Create = () => {
         createProject.mutate({
             githubUrl: data.repoUrl,
             name:data.projectName,
-            githubToken:data.githubToken,
+            githubToken: data.githubToken ?? '',
         },{
             onSuccess:async ()=>{
                 toast.success('Project created successfully');
