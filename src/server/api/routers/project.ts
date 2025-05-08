@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
@@ -57,7 +58,6 @@ export const projectRouter = createTRPCRouter({
       });
     }),
 
-  // First, let's add some debugging to see what's happening
   saveAnswer: protectedProcedure
     .input(
       z.object({
@@ -74,10 +74,6 @@ export const projectRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      // Add debugging to see what ctx contains
-      console.log("Context DB:", ctx.db);
-      console.log("Context DB Question:", ctx.db?.question);
-
       if (!ctx.db) {
         throw new Error("Database context is undefined");
       }
@@ -192,37 +188,95 @@ export const projectRouter = createTRPCRouter({
       });
     }),
 
-getArchivedProjects: protectedProcedure.query(async ({ ctx }) => {
-  return ctx.db.project.findMany({
-    where: {
-      userToProject: {
-        some: {
-          userId: ctx.user.userId!,
+  getArchivedProjects: protectedProcedure.query(async ({ ctx }) => {
+    return ctx.db.project.findMany({
+      where: {
+        userToProject: {
+          some: {
+            userId: ctx.user.userId!,
+          },
+        },
+        deletedAt: {
+          not: null
         },
       },
-      deletedAt: {
-        not: null
-      },
-    },
-    orderBy: {
-      deletedAt: 'desc', 
-    },
-  });
-}),
-
-restoreProject: protectedProcedure
-  .input(z.object({ ProjectId: z.string() }))
-  .mutation(async ({ ctx, input }) => {
-    return await ctx.db.project.update({
-      where: {
-        id: input.ProjectId,
-      },
-      data: {
-        deletedAt: null,
+      orderBy: {
+        deletedAt: 'desc', 
       },
     });
   }),
 
+  restoreProject: protectedProcedure
+    .input(z.object({ ProjectId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.db.project.update({
+        where: {
+          id: input.ProjectId,
+        },
+        data: {
+          deletedAt: null,
+        },
+      });
+    }),
+
+  // Fixed deleteProject functionality to handle all related data
+  deleteProject: protectedProcedure
+  .input(z.object({ projectId: z.string() }))
+  .mutation(async ({ ctx, input }) => {
+    try {
+      await ctx.db.$transaction(async (tx) => {
+        // Step 1: Delete questions (includes fileReference JSON)
+        await tx.question.deleteMany({
+          where: { projectId: input.projectId },
+        });
+
+        // Step 2: Delete commits
+        await tx.commit.deleteMany({
+          where: { projectId: input.projectId },
+        });
+
+        // Step 3: Find meeting IDs for issue deletion
+        const meetings = await tx.meeting.findMany({
+          where: { projectId: input.projectId },
+          select: { id: true },
+        });
+
+        const meetingIds = meetings.map((m) => m.id);
+        if (meetingIds.length > 0) {
+          await tx.issue.deleteMany({
+            where: { meetingId: { in: meetingIds } },
+          });
+        }
+
+        // Step 4: Delete meetings
+        await tx.meeting.deleteMany({
+          where: { projectId: input.projectId },
+        });
+
+        // Step 5: Delete source code embeddings
+        await tx.sourceCodeEmbedding.deleteMany({
+          where: { projectId: input.projectId },
+        });
+
+        // Step 6: Delete user-project associations
+        await tx.userToProject.deleteMany({
+          where: { projectId: input.projectId },
+        });
+
+        // Final Step: Delete the project
+        await tx.project.delete({
+          where: { id: input.projectId },
+        });
+      });
+
+      return { success: true };
+    } catch (error) {
+      console.error("Error deleting project:", error);
+      throw new Error(`Failed to delete project: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }),
+
+  
   getTeamMembers: protectedProcedure
     .input(z.object({ projectId: z.string() }))
     .query(async ({ ctx, input }) => {
